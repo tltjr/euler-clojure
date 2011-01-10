@@ -1,41 +1,23 @@
-;; There has to be a better way, but I couldn't find it
-(defn append [n coll]
-  (reverse (cons n (reverse coll))))
-
 (defn transform [n]
   (if (even? n)
     (/ n 2)
-    (+ (* n 3) 1)))
+    (inc (* n 3))))
+
+(def memo-transform (memoize transform))
+
+;; Memoization made an unbelievable difference
+;; Before:
+;; Clojure=> (time (map itseq (range 1 201)))
+;; "Elapsed time: 0.435738 msecs"
+;; After:
+;; Clojure=> (time (map itseq (range 1 201)))
+;; "Elapsed time: 0.036946 msecs"
 
 (defn itseq [n]
-  (loop [n 0 coll '()]
-    (if (= n 1)
-      (append n coll)
-      (recur (transform n) (append n coll)))))
+  (loop [m n cnt 0]
+    (if (= m 1)
+        [(inc cnt) n]
+      (recur (memo-transform m) (inc cnt)))))
 
-;; (defn itseq [n]
-;;   (defn rec [n coll]
-;;     (if (= n 1)
-;;       (append n coll)
-;;       (recur (transform n) (append n coll))))
-;;   (rec n '()))
-
-;; (defn max-itseq [outer-coll]
-;;   (defn rec [outer-coll mx n]
-;;     (if (empty? outer-coll)
-;;       n
-;;       (let [inner-coll (first outer-coll)]
-;;         (if (> (count inner-coll) mx)
-;;           (rec (rest outer-coll) (count inner-coll) (first inner-coll))
-;;           (rec (rest outer-coll) mx n)))))
-;;   (rec outer-coll 0 0))
-
-(defn max-itseq [outer-coll]
-  (defn rec [outer-coll mx n]
-    (if (empty? outer-coll)
-      n
-      (let [inner-coll (first outer-coll)]
-        (if (> (count inner-coll) mx)
-          (recur (rest outer-coll) (count inner-coll) (first inner-coll))
-          (recur (rest outer-coll) mx n)))))
-  (rec outer-coll 0 0))
+;; be prepared to take a nap when you run this
+(reduce #(if (> (first %1) (first %2)) %1 %2) (map itseq (range 1 1000000)))
