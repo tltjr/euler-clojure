@@ -1,3 +1,5 @@
+(use 'clojure.contrib.combinatorics)
+
 (def tri (cartesian-product '(75) 
                             '(95 64) 
                             '(17 47 82) 
