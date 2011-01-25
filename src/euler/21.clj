@@ -21,3 +21,7 @@
 (defn amicables [n]
   (let [all (map #(n-with-d %) (range (inc n)))]
     (filter amicable? (for [x all y all] [x y]))))
+
+(defn sum-amicables-to [n]
+  (/ (reduce + (flatten (amicables n))) 4))
+
